@@ -1,32 +1,18 @@
 package solid.lsp;
 
 /**
- * LSP violation: strengthens preconditions / throws a new exception type.
- *
- * <p>An online section has no seat limit and no room, so it "cannot" implement
- * {@code enroll} / {@code scheduleRoom} the way the base class promises -- it
- * throws {@link UnsupportedOperationException} instead. Any code holding a
- * {@code CourseSection} reference now breaks when handed one of these.
+ * An online section: no room, no seat limit. It honours the {@link Enrollable}
+ * contract fully -- {@code enroll} always adds the student -- so it is
+ * substitutable everywhere an {@code Enrollable} is expected.
  */
 public class SelfPacedOnlineSection extends CourseSection {
 
     public SelfPacedOnlineSection(String code) {
-        super(code, Integer.MAX_VALUE);
+        super(code);
     }
 
     @Override
     public void enroll(Student student) {
-        throw new UnsupportedOperationException(
-                code() + " is self-paced online; call join() instead of enroll()");
-    }
-
-    @Override
-    public void scheduleRoom(String room) {
-        throw new UnsupportedOperationException(code() + " is online; it has no room");
-    }
-
-    /** The "real" API this class wants callers to use. */
-    public void join(Student student) {
-        roster().add(student);
+        roster.add(student);
     }
 }

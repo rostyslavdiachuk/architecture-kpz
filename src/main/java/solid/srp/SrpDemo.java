@@ -1,19 +1,28 @@
 package solid.srp;
 
-import common.Console;
-
 import java.util.List;
 import java.util.Set;
+
+import common.Console;
 
 public class SrpDemo {
 
     public static void main(String[] args) {
-        Console.header("SOLID / SRP -- one enrollment 'god class'");
+        Console.header("SOLID / SRP -- enrollment split into single-purpose collaborators");
 
-        StudentEnrollmentService service = new StudentEnrollmentService();
-        service.seedStudent(new Student("S-01", "Olena Kovalenko", "olena@chnu.edu.ua",
+        StudentRepository students = new StudentRepository();
+        AuditLog audit = new AuditLog();
+        StudentEnrollmentService service = new StudentEnrollmentService(
+                students,
+                new EnrollmentPolicy(30),
+                new TuitionCalculator(),
+                new ConfirmationLetterFormatter(),
+                new EmailNotifier(),
+                audit);
+
+        students.save(new Student("S-01", "Olena Kovalenko", "olena@chnu.edu.ua",
                 Set.of("CS101", "MATH101"), 20));
-        service.seedStudent(new Student("S-02", "Petro Bondar", "petro@chnu.edu.ua",
+        students.save(new Student("S-02", "Petro Bondar", "petro@chnu.edu.ua",
                 Set.of(), 28));
 
         Course algorithms = new Course("CS201", "Algorithms & Data Structures", 6,
@@ -30,13 +39,10 @@ public class SrpDemo {
         service.enroll("S-01", databases);
 
         Console.header("Registrar opens the audit trail");
-        List<String> audit = service.auditTrail();
-        audit.forEach(Console::note);
-        Console.fail("2 of the 3 attempts were rejected; the audit trail has only "
-                + audit.size() + " line(s) and not one of the rejections -- they are invisible");
-        Console.note("The audit call lives inside the letter-formatting block, so it only "
-                + "runs on the happy path.");
-        Console.note("Refactor task: give persistence, rules, pricing, formatting, e-mail "
-                + "and audit each their own class; keep this service as a thin orchestrator.");
+        audit.lines().forEach(Console::note);
+        Console.ok("every attempt is recorded -- the 2 rejections are right there, because "
+                + "AuditLog is its own collaborator called on every path");
+        Console.note("Each concern -- persistence, rules, pricing, formatting, e-mail, audit "
+                + "-- now changes in isolation.");
     }
 }

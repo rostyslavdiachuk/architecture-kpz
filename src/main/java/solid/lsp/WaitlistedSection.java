@@ -1,24 +1,37 @@
 package solid.lsp;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
- * LSP violation: weakens the postcondition.
- *
- * <p>The base contract says {@code enroll} adds the student or throws. This
- * subclass, when full, does <b>neither</b> -- it just returns, quietly moving the
- * student to an (imaginary) waitlist. Callers believe the enrollment succeeded.
+ * A capped section with an explicit waitlist. It honours the contract: when the
+ * roster is full {@code enroll} throws {@link SectionFullException} -- it never
+ * pretends to have enrolled someone. The waitlist is a separate, visible
+ * operation.
  */
 public class WaitlistedSection extends CourseSection {
 
+    private final int capacity;
+    private final List<Student> waitlist = new ArrayList<>();
+
     public WaitlistedSection(String code, int capacity) {
-        super(code, capacity);
+        super(code);
+        this.capacity = capacity;
     }
 
     @Override
     public void enroll(Student student) {
-        if (remainingSeats() <= 0) {
-            // silently "waitlisted" -- no add, no throw
-            return;
+        if (roster.size() >= capacity) {
+            throw new SectionFullException(code() + " is full; joinWaitlist() is available");
         }
-        super.enroll(student);
+        roster.add(student);
+    }
+
+    public void joinWaitlist(Student student) {
+        waitlist.add(student);
+    }
+
+    public List<Student> waitlist() {
+        return List.copyOf(waitlist);
     }
 }

@@ -1,16 +1,16 @@
 package solid.isp;
 
 import common.Console;
+import solid.isp.Roles.Teacher;
+import solid.isp.Roles.ThesisSupervisor;
 
-/** A lecturer forced to implement tuition / enrollment methods it has no use for. */
-public class Lecturer implements UniversityMember {
+/** A lecturer teaches and supervises theses -- and nothing else here. */
+public class Lecturer implements Teacher, ThesisSupervisor {
 
     private final String fullName;
-    private final boolean departmentHead;
 
-    public Lecturer(String fullName, boolean departmentHead) {
+    public Lecturer(String fullName) {
         this.fullName = fullName;
-        this.departmentHead = departmentHead;
     }
 
     @Override
@@ -36,30 +36,5 @@ public class Lecturer implements UniversityMember {
     @Override
     public void superviseThesis(String studentId) {
         Console.ok(fullName + " supervises thesis of " + studentId);
-    }
-
-    @Override
-    public void approveDepartmentBudget(int amountUah) {
-        if (!departmentHead) {
-            throw new UnsupportedOperationException(fullName + " is not a department head");
-        }
-        Console.ok(fullName + " approved a department budget of " + amountUah + " UAH");
-    }
-
-    // --- methods that make no sense for a lecturer ---
-
-    @Override
-    public void enrollInCourse(String courseCode) {
-        throw new UnsupportedOperationException("a lecturer does not enroll in " + courseCode);
-    }
-
-    @Override
-    public void payTuition(int amountUah) {
-        throw new UnsupportedOperationException("a lecturer does not pay tuition");
-    }
-
-    @Override
-    public void requestTranscript() {
-        throw new UnsupportedOperationException("a lecturer has no student transcript");
     }
 }

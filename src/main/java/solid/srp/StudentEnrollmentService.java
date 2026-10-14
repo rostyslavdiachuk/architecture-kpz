@@ -1,88 +1,57 @@
 package solid.srp;
 
+import java.util.Optional;
+
 import common.Console;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
 /**
- * SRP smell: one class with many reasons to change.
- *
- * <p>{@link #enroll} alone does persistence, prerequisite + credit-limit rules,
- * tuition pricing, letter formatting, e-mail delivery and audit logging. Every
- * one of those is a different stakeholder: the registrar, the dean of studies,
- * the bursar, the marketing office, the IT mail team and the internal auditor.
- *
- * <p>Concrete consequence shown by the demo: the audit line is written in the
- * middle of the "format + send letter" block, so a <b>rejected</b> enrollment
- * leaves no audit trace at all.
+ * One responsibility: orchestrate an enrollment. Each other concern lives in its
+ * own collaborator, so this class reads like a table of contents -- and the
+ * audit log is now written on every path, including rejections.
  */
 public class StudentEnrollmentService {
 
-    private final Map<String, Student> studentTable = new HashMap<>();
-    private final List<String> auditTable = new ArrayList<>();
+    private final StudentRepository students;
+    private final EnrollmentPolicy policy;
+    private final TuitionCalculator tuition;
+    private final ConfirmationLetterFormatter letters;
+    private final EmailNotifier email;
+    private final AuditLog audit;
 
-    public void seedStudent(Student student) {
-        studentTable.put(student.id(), student);
-    }
-
-    public List<String> auditTrail() {
-        return auditTable;
+    public StudentEnrollmentService(StudentRepository students, EnrollmentPolicy policy,
+                                    TuitionCalculator tuition, ConfirmationLetterFormatter letters,
+                                    EmailNotifier email, AuditLog audit) {
+        this.students = students;
+        this.policy = policy;
+        this.tuition = tuition;
+        this.letters = letters;
+        this.email = email;
+        this.audit = audit;
     }
 
     public void enroll(String studentId, Course course) {
-        // --- persistence: load the row -------------------------------------
-        Student student = studentTable.get(studentId);
-        if (student == null) {
+        Optional<Student> found = students.findById(studentId);
+        if (found.isEmpty()) {
             Console.fail("no student row for id=" + studentId);
             return;
         }
+        Student student = found.get();
+        audit.record("ATTEMPT " + studentId + " " + course.code());
 
-        // --- business rule: prerequisites --------------------------------
-        for (String prereq : course.prerequisiteCodes()) {
-            if (!student.completedCourseCodes().contains(prereq)) {
-                Console.fail(student.fullName() + " is missing prerequisite " + prereq
-                        + " for " + course.code() + " -> rejected");
-                return; // note: no audit line written on this path
-            }
+        Optional<String> rejection = policy.rejectionReason(student, course);
+        if (rejection.isPresent()) {
+            audit.record("REJECTED " + studentId + " " + course.code() + " (" + rejection.get() + ")");
+            Console.fail(student.fullName() + ": " + rejection.get() + " -> rejected");
+            return;
         }
 
-        // --- business rule: credit-load cap -----------------------------
-        int maxCreditsPerTerm = 30;
-        if (student.enrolledCredits() + course.credits() > maxCreditsPerTerm) {
-            Console.fail(student.fullName() + " would exceed the " + maxCreditsPerTerm
-                    + "-credit term cap -> rejected");
-            return; // note: no audit line written on this path either
-        }
-
-        // --- pricing: tuition for this course --------------------------
-        int tuition = course.credits() * course.pricePerCredit();
-        if (student.completedCourseCodes().size() >= 10) {
-            tuition = (int) Math.round(tuition * 0.9); // senior-student discount
-        }
-
-        // --- persistence: update the row ------------------------------
+        int due = tuition.tuitionFor(student, course);
         student.addEnrolledCredits(course.credits());
-        studentTable.put(student.id(), student);
+        students.save(student);
 
-        // --- presentation + I/O + audit, all tangled together -------
-        String letter = "Dear " + student.fullName() + ",\n"
-                + "  You are now enrolled in " + course.code() + " \"" + course.title() + "\".\n"
-                + "  Tuition due: " + tuition + " UAH.\n"
-                + "  Regards, Registrar's Office";
-        Console.step("SMTP -> " + student.email() + "\n" + indent(letter));
-        auditTable.add("ENROLLED " + student.id() + " " + course.code() + " tuition=" + tuition);
+        email.send(student.email(), letters.format(student, course, due));
+        audit.record("ENROLLED " + studentId + " " + course.code() + " tuition=" + due);
         Console.ok("enrolled " + student.fullName() + " in " + course.code()
                 + " (term credits now " + student.enrolledCredits() + ")");
-    }
-
-    private static String indent(String block) {
-        StringBuilder sb = new StringBuilder();
-        for (String line : block.split("\n")) {
-            sb.append("      | ").append(line).append('\n');
-        }
-        return sb.toString().stripTrailing();
     }
 }

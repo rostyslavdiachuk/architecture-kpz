@@ -5,37 +5,26 @@ import common.Console;
 public class OcpDemo {
 
     public static void main(String[] args) {
-        Console.header("SOLID / OCP -- final-grade calculator with a switch per scheme");
+        Console.header("SOLID / OCP -- grading schemes as strategies");
 
         FinalGradeCalculator calc = new FinalGradeCalculator();
 
-        report(calc, GradingScheme.STANDARD, 87);
-        report(calc, GradingScheme.PASS_FAIL, 58);
-        report(calc, GradingScheme.HONORS, 95);
-        report(calc, GradingScheme.ECTS, 66);
+        report(calc, "STANDARD", new StandardScheme(), 87);
+        report(calc, "PASS_FAIL", new PassFailScheme(), 58);
+        report(calc, "HONORS", new HonorsScheme(), 95);
+        report(calc, "ECTS", new EctsScheme(), 66);
 
         Console.header("New requirement: master's-thesis defence uses the THESIS scheme");
-        Console.note("Rule: score >= 75 -> \"Defended\" and 4.0 GPA points, otherwise "
-                + "\"Not defended\" and 0.0.");
-        Console.step("Student defended with score 92 -- ask the existing calculator:");
+        Console.note("Added ThesisScheme.java only -- FinalGradeCalculator was not touched.");
+        report(calc, "THESIS", new ThesisScheme(), 92);
+        report(calc, "THESIS", new ThesisScheme(), 40);
 
-        String letter = calc.letterGrade(GradingScheme.THESIS, 92);
-        double gpa = calc.gpaPoints(GradingScheme.THESIS, 92);
-        Console.fail("letterGrade -> \"" + letter + "\"  (default arm: bogus letter)");
-        Console.fail("gpaPoints   -> " + gpa + "  (default arm: silently zero, wrecks the GPA)");
-        try {
-            calc.transcriptLabel(GradingScheme.THESIS, 92);
-        } catch (RuntimeException e) {
-            Console.fail("transcriptLabel -> throws: " + e.getMessage());
-        }
-
-        Console.note("One new scheme, three files to touch, three different failure modes.");
-        Console.note("Refactor task: make GradingScheme a strategy interface so a new "
-                + "scheme is a new class and the calculator never changes.");
+        Console.ok("Every scheme answers letterGrade / gpaPoints / label consistently; "
+                + "there is no 'default' arm left to get wrong.");
     }
 
-    private static void report(FinalGradeCalculator calc, GradingScheme scheme, int score) {
-        Console.ok(scheme + " @ " + score + "  ->  letter=" + calc.letterGrade(scheme, score)
+    private static void report(FinalGradeCalculator calc, String name, GradingScheme scheme, int score) {
+        Console.ok(name + " @ " + score + "  ->  letter=" + calc.letterGrade(scheme, score)
                 + ", gpa=" + calc.gpaPoints(scheme, score)
                 + ", transcript=\"" + calc.transcriptLabel(scheme, score) + "\"");
     }

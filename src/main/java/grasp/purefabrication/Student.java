@@ -1,20 +1,10 @@
 package grasp.purefabrication;
 
-import common.Console;
-
 /**
- * GRASP / Pure Fabrication smell (the absence of one).
- *
- * <p>{@code Student} is a domain entity, but it also carries its own persistence
- * (hand-built SQL, a static "connection") and its own outbound e-mail. Two extra
- * reasons to change, a hard dependency on a database dialect, and the domain rule
- * {@link #isEligibleForDeansList()} cannot be exercised without all of it.
+ * Pure domain now: state and domain behaviour, nothing else. No SQL, no static
+ * connection, no e-mail. It can be created and reasoned about on its own.
  */
 public class Student {
-
-    /** Merely loading this class "connects". */
-    private static final FakeConnection CONNECTION =
-            FakeConnection.open("jdbc:postgresql://db.chnu.edu.ua:5432/registry");
 
     private final long id;
     private final String fullName;
@@ -30,39 +20,27 @@ public class Student {
         this.gpa = gpa;
     }
 
-    // --- domain behaviour ------------------------------------------------
     public boolean isEligibleForDeansList() {
         return gpa >= 3.75;
+    }
+
+    public long id() {
+        return id;
     }
 
     public String fullName() {
         return fullName;
     }
 
-    // --- persistence, welded onto the entity --------------------------
-    public void saveToDatabase() {
-        String sql = "INSERT INTO students(id, full_name, email, programme, gpa) VALUES ("
-                + id + ", '" + fullName + "', '" + email + "', '" + programme + "', " + gpa + ")";
-        CONNECTION.execute(sql);
+    public String email() {
+        return email;
     }
 
-    // --- outbound e-mail, also welded on -----------------------------
-    public void emailWelcome() {
-        Console.step("SMTP -> " + email + " | Welcome to " + programme + ", " + fullName + "!");
+    public String programme() {
+        return programme;
     }
 
-    /** Tiny stand-in for a JDBC connection. */
-    static final class FakeConnection {
-        private FakeConnection(String url) {
-            Console.note("FakeConnection: opened " + url);
-        }
-
-        static FakeConnection open(String url) {
-            return new FakeConnection(url);
-        }
-
-        void execute(String sql) {
-            Console.note("SQL> " + sql);
-        }
+    public double gpa() {
+        return gpa;
     }
 }

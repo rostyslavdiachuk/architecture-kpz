@@ -1,9 +1,11 @@
 package solid.isp;
 
 import common.Console;
+import solid.isp.Roles.Learner;
+import solid.isp.Roles.TranscriptRequester;
 
-/** A student forced to implement teaching / budget methods it has no use for. */
-public class Student implements UniversityMember {
+/** A student implements only the roles a student has. No stub methods. */
+public class Student implements Learner, TranscriptRequester {
 
     private final String fullName;
 
@@ -29,32 +31,5 @@ public class Student implements UniversityMember {
     @Override
     public void requestTranscript() {
         Console.ok(fullName + " requested a transcript");
-    }
-
-    // --- methods that make no sense for a student ---
-
-    @Override
-    public void teachCourse(String courseCode) {
-        throw new UnsupportedOperationException("a student cannot teach " + courseCode);
-    }
-
-    @Override
-    public void submitGrades(String courseCode) {
-        throw new UnsupportedOperationException("a student cannot submit grades for " + courseCode);
-    }
-
-    @Override
-    public void holdOfficeHours() {
-        throw new UnsupportedOperationException("a student does not hold office hours");
-    }
-
-    @Override
-    public void superviseThesis(String studentId) {
-        throw new UnsupportedOperationException("a student cannot supervise a thesis");
-    }
-
-    @Override
-    public void approveDepartmentBudget(int amountUah) {
-        throw new UnsupportedOperationException("a student cannot approve a budget");
     }
 }

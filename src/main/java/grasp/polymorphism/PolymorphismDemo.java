@@ -1,36 +1,30 @@
 package grasp.polymorphism;
 
-import common.Console;
-
 import java.util.List;
+
+import common.Console;
 
 public class PolymorphismDemo {
 
     public static void main(String[] args) {
-        Console.header("GRASP / Polymorphism -- one if/else type-switch, repeated 3x");
+        Console.header("GRASP / Polymorphism -- one Channel type per behaviour");
 
         NotificationCenter center = new NotificationCenter();
 
-        List<Notification> supported = List.of(
-                new Notification(Channel.EMAIL, "olena@chnu.edu.ua", "Exam CS201 moved to room A-201"),
-                new Notification(Channel.SMS, "+380671234567", "Exam CS201 moved to A-201"),
-                new Notification(Channel.PUSH, "device-88", "Exam CS201 moved"),
-                new Notification(Channel.TELEGRAM, "olena_k", "Exam CS201 moved to A-201"));
+        List<Notification> notifications = List.of(
+                new Notification(new EmailChannel(), "olena@chnu.edu.ua", "Exam CS201 moved to room A-201"),
+                new Notification(new SmsChannel(), "+380671234567", "Exam CS201 moved to A-201"),
+                new Notification(new PushChannel(), "device-88", "Exam CS201 moved"),
+                new Notification(new TelegramChannel(), "olena_k", "Exam CS201 moved to A-201"),
+                new Notification(new ViberChannel(), "olena_k", "Exam CS201 moved to A-201"));
 
-        for (Notification n : supported) {
+        for (Notification n : notifications) {
             center.send(n);
             Console.note("preview: " + center.formatPreview(n) + " | cost "
                     + center.estimateCostUah(n) + " UAH");
         }
 
-        Console.header("Registrar: send exam alerts over Viber too");
-        Notification viber = new Notification(Channel.VIBER, "olena_k", "Exam CS201 moved to A-201");
-        center.send(viber);
-        Console.fail("preview: " + center.formatPreview(viber) + " | cost "
-                + center.estimateCostUah(viber) + " UAH  -- fell through every else branch");
-
-        Console.note("Refactor task: a Channel interface with deliver(), previewLabel(), "
-                + "cost(); one class per channel; ViberChannel added without touching "
-                + "NotificationCenter.");
+        Console.ok("Viber went out with a real preview and a real cost -- NotificationCenter "
+                + "was never edited to support it.");
     }
 }

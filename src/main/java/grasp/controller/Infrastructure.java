@@ -1,11 +1,11 @@
 package grasp.controller;
 
-import common.Console;
-
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import common.Console;
 
 /** Small in-memory stand-ins shared by both entry points. */
 public final class Infrastructure {

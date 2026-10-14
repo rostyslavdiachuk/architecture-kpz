@@ -1,11 +1,11 @@
 package grasp.indirection;
 
-import common.Console;
-
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+
+import common.Console;
 
 /**
  * Two third-party payment APIs with nothing in common: different method names,

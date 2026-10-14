@@ -1,23 +1,18 @@
 package solid.isp;
 
-import common.Console;
-
 import java.util.List;
 
+import solid.isp.Roles.Teacher;
+
 /**
- * End-of-term job. All it needs is "something that can submit grades", but the
- * only type available is the fat {@link UniversityMember}, so it accepts the
- * whole campus and hopes every element supports the call.
+ * It needs "things that can submit grades", so that is exactly the type it
+ * asks for. No {@code try/catch}, no members that cannot do the job.
  */
 public class TermClosingJob {
 
-    public void collectGrades(List<UniversityMember> members, String courseCode) {
-        for (UniversityMember m : members) {
-            try {
-                m.submitGrades(courseCode);
-            } catch (UnsupportedOperationException e) {
-                Console.fail("submitGrades on " + m.fullName() + ": " + e.getMessage());
-            }
+    public void collectGrades(List<Teacher> teachers, String courseCode) {
+        for (Teacher t : teachers) {
+            t.submitGrades(courseCode);
         }
     }
 }

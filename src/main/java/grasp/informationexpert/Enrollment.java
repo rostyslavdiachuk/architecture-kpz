@@ -1,9 +1,8 @@
 package grasp.informationexpert;
 
 /**
- * Anemic: it holds a course and a grade but exposes only getters. The class
- * that has the data does nothing with it, so every caller recomputes
- * "quality points = grade points x credits" for itself -- and they disagree.
+ * Information expert for one line of the record: it holds the grade and the
+ * course, so it is the right place to turn them into quality points.
  */
 public class Enrollment {
 
@@ -13,6 +12,15 @@ public class Enrollment {
     public Enrollment(Course course, Grade grade) {
         this.course = course;
         this.grade = grade;
+    }
+
+    public int creditsAttempted() {
+        return course.credits();
+    }
+
+    /** GPA points earned for this course, weighted by its credits. */
+    public double qualityPoints() {
+        return grade.points() * course.credits();
     }
 
     public Course course() {

@@ -4,9 +4,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * The course aggregates its enrollments and knows its own capacity -- it has
- * everything needed to create an {@link Enrollment}. Yet here it only exposes
- * its internal list for someone else to mutate.
+ * The course is the creator: it aggregates enrollments and knows its capacity,
+ * so it builds the {@link Enrollment} and files it on its own roster in one
+ * step. The roster is no longer handed out for external mutation.
  */
 public class Course {
 
@@ -23,9 +23,17 @@ public class Course {
         return code;
     }
 
-    /** Leaky: callers are trusted to add the enrollments they create. */
+    public Enrollment enroll(Student student, Semester semester) {
+        if (remainingSeats() <= 0) {
+            throw new IllegalStateException(code + " is full");
+        }
+        Enrollment enrollment = new Enrollment(student, this, semester);
+        roster.add(enrollment);
+        return enrollment;
+    }
+
     public List<Enrollment> roster() {
-        return roster;
+        return List.copyOf(roster);
     }
 
     public int remainingSeats() {

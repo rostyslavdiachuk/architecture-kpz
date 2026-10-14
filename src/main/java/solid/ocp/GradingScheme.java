@@ -1,16 +1,15 @@
 package solid.ocp;
 
 /**
- * Grading schemes the university supports.
- *
- * <p>{@code THESIS} was added this term for the new master's-thesis defence.
- * Notice that adding the constant here is <em>not</em> enough: every
- * {@code switch} in {@link FinalGradeCalculator} also has to learn about it.
+ * A grading scheme now answers every question about a score itself. Adding a
+ * scheme means adding a class that implements this interface -- nothing else
+ * changes, so the system is closed for modification and open for extension.
  */
-public enum GradingScheme {
-    STANDARD,
-    PASS_FAIL,
-    HONORS,
-    ECTS,
-    THESIS
+public interface GradingScheme {
+
+    String letterGrade(int score);
+
+    double gpaPoints(int score);
+
+    String label(int score);
 }

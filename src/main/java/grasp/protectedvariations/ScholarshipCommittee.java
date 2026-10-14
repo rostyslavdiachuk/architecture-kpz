@@ -1,19 +1,19 @@
 package grasp.protectedvariations;
 
-/**
- * A third copy of the thresholds. Here "First Class" was typed as 88 by mistake,
- * and merit funding keys off it.
- */
+/** Merit funding keys off the same classification everyone else sees. */
 public class ScholarshipCommittee {
 
+    private final GradeClassificationPolicy policy;
+
+    public ScholarshipCommittee(GradeClassificationPolicy policy) {
+        this.policy = policy;
+    }
+
     public boolean qualifiesForMeritFunding(int finalScore) {
-        return classification(finalScore).equals("First Class");
+        return "First Class".equals(policy.classify(finalScore));
     }
 
     public String classification(int finalScore) {
-        if (finalScore >= 88) return "First Class";
-        if (finalScore >= 75) return "Upper Second Class";
-        if (finalScore >= 60) return "Lower Second Class";
-        return "Fail";
+        return policy.classify(finalScore);
     }
 }

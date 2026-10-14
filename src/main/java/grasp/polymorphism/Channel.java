@@ -1,10 +1,14 @@
 package grasp.polymorphism;
 
-/** Delivery channels. VIBER is the new one the registrar just asked for. */
-public enum Channel {
-    EMAIL,
-    SMS,
-    PUSH,
-    TELEGRAM,
-    VIBER
+/**
+ * A delivery channel now answers every channel-specific question itself. Adding
+ * a channel is adding a class; {@link NotificationCenter} never changes.
+ */
+public interface Channel {
+
+    void deliver(String recipient, String text);
+
+    String previewLabel(String recipient, String text);
+
+    double costUah(String text);
 }

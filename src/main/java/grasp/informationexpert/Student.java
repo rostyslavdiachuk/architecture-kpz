@@ -26,7 +26,7 @@ public class Student {
         enrollments.add(enrollment);
     }
 
-    public List<Enrollment> enrollments() {
-        return enrollments;
+    public Transcript transcript() {
+        return new Transcript(enrollments);
     }
 }

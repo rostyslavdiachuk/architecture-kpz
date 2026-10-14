@@ -4,52 +4,26 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Base class for a section of a course.
- *
- * <p>Contract that callers rely on:
- * <ul>
- *   <li>{@code enroll(s)} either adds {@code s} to {@link #roster()} or throws
- *       {@link SectionFullException} -- nothing else;</li>
- *   <li>{@code scheduleRoom(room)} assigns a physical room.</li>
- * </ul>
- * The subclasses in this package break that contract.
+ * Shared state for every kind of section: an identifier and a roster. It no
+ * longer promises {@code enroll} or {@code scheduleRoom} -- those live on the
+ * subtypes that can actually honour them.
  */
-public class CourseSection {
+public abstract class CourseSection implements Enrollable {
 
     private final String code;
-    private final int capacity;
-    private final List<Student> roster = new ArrayList<>();
-    private String room = "unassigned";
+    protected final List<Student> roster = new ArrayList<>();
 
-    public CourseSection(String code, int capacity) {
+    protected CourseSection(String code) {
         this.code = code;
-        this.capacity = capacity;
     }
 
+    @Override
     public String code() {
         return code;
     }
 
+    @Override
     public List<Student> roster() {
-        return roster;
-    }
-
-    public int remainingSeats() {
-        return capacity - roster.size();
-    }
-
-    public void enroll(Student student) {
-        if (roster.size() >= capacity) {
-            throw new SectionFullException(code + " is full");
-        }
-        roster.add(student);
-    }
-
-    public void scheduleRoom(String room) {
-        this.room = room;
-    }
-
-    public String room() {
-        return room;
+        return List.copyOf(roster);
     }
 }

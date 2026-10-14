@@ -1,37 +1,35 @@
 package solid.isp;
 
-import common.Console;
-
 import java.util.List;
+
+import common.Console;
+import solid.isp.Roles.BudgetApprover;
+import solid.isp.Roles.Teacher;
+import solid.isp.Roles.TranscriptRequester;
 
 public class IspDemo {
 
     public static void main(String[] args) {
-        Console.header("SOLID / ISP -- one fat UniversityMember interface");
+        Console.header("SOLID / ISP -- role interfaces, each client takes what it needs");
 
-        List<UniversityMember> campus = List.of(
-                new Lecturer("Dr. Hryhoriy Ostapenko", true),
-                new Student("Sofia Marchenko"),
-                new Student("Dmytro Kravets"));
+        DepartmentHead head = new DepartmentHead("Dr. Hryhoriy Ostapenko");
+        Lecturer lecturer = new Lecturer("Dr. Solomiya Veres");
+        Student sofia = new Student("Sofia Marchenko");
+        Student dmytro = new Student("Dmytro Kravets");
 
-        Console.step("TermClosingJob asks every campus member to submit grades for CS201");
-        new TermClosingJob().collectGrades(campus, "CS201");
+        Console.step("TermClosingJob takes List<Teacher> -- students are not even a candidate");
+        new TermClosingJob().collectGrades(List.<Teacher>of(head, lecturer), "CS201");
 
-        Console.step("Campus portal asks every member for a transcript");
-        for (UniversityMember m : campus) {
-            try {
-                m.requestTranscript();
-            } catch (UnsupportedOperationException e) {
-                Console.fail("requestTranscript on " + m.fullName() + ": " + e.getMessage());
-            }
+        Console.step("Campus portal takes List<TranscriptRequester>");
+        for (TranscriptRequester r : List.<TranscriptRequester>of(sofia, dmytro)) {
+            r.requestTranscript();
         }
 
-        Console.header("Why it broke");
-        Console.fail("Student is forced to implement teachCourse/submitGrades/... and "
-                + "Lecturer to implement payTuition/requestTranscript/...");
-        Console.fail("Every client must guard every call with try/catch.");
-        Console.note("Refactor task: split into role interfaces (Teacher, Learner, "
-                + "ThesisSupervisor, BudgetApprover, TranscriptRequester); each client "
-                + "depends only on the role it needs.");
+        Console.step("Budget approval asks only for a BudgetApprover");
+        BudgetApprover approver = head;
+        approver.approveDepartmentBudget(250_000);
+
+        Console.ok("No UnsupportedOperationException anywhere; no client guards a call. "
+                + "The compiler rejects 'student submits grades' before it can run.");
     }
 }
