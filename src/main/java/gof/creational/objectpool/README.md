@@ -2,49 +2,48 @@
 
 ## Scenario
 
-In the *Dungeon Raid* boss fight the crossbow turret fires **4 bolts per frame**
-for **300 frames** (5 seconds at 60 FPS). Each bolt flies for 15 frames, hits the
-wall and disappears, so at most ~60 bolts are ever in the air at once. The game
-must hold 60 FPS: every frame has a 16 ms budget.
+In the *Dungeon Raid* boss fight the crossbow turret fires **1 bolt per frame**
+for **600 frames** (10 seconds at 60 FPS). Each bolt flies for 10 frames, hits
+the wall and disappears, so **at most 10 bolts** are ever in the air at once.
+
+Creating a bolt is expensive: its constructor loads the sprite and the
+fire-trail effect (~5 ms).
 
 ## Smell
 
-`Turret.fire()` does `new Bolt(...)` for **every shot**, and `update()` just drops
-bolts that hit the wall. Objects that live a quarter of a second are created and
-thrown away in a tight loop. `GameHeap` simulates what the JVM does about that:
-allocations fill the young generation, and when it is full the GC freezes the
-game for 40 ms.
+`Turret.fire()` does `new Bolt(...)` for **every shot**, and `update()` throws
+away every bolt that hits the wall. The game keeps building the same expensive
+object, uses it for a moment, and drops it.
 
 ## Consequence in the demo
 
-- **1200** bolts are allocated, although **~60** would be enough.
-- The GC freezes the game **9 times**, which means **9 dropped frames**. The
-  player sees the boss fight stutter.
+- **600** bolts are created, although **10** would be enough.
+- That is **3000 ms** spent loading the same sprite again and again.
 
 ## Your task (live)
 
 Reuse the bolts instead of throwing them away:
 
-1. Add `BoltPool` with a fixed capacity (64). Its constructor allocates all bolts
+1. Add `BoltPool` with a fixed capacity (10). Its constructor creates all bolts
    **once**, while the level loads.
    - `Bolt acquire()`: takes a free bolt, or returns `null` if none are left
-   - `void release(Bolt bolt)`: gives the bolt back
-2. `Bolt` gets a no-arg constructor and `reset(int x, int speed)`, which
-   re-initializes **every** field.
+   - `void release(Bolt bolt)`: puts the bolt back
+2. `Bolt` gets a no-arg constructor and `reset(int x, int speed)`, which sets
+   **every** field again.
 3. `Turret.fire()` → `pool.acquire()` + `reset(...)`. `update()` →
    `pool.release(bolt)` when the bolt hits the wall.
 
 ## Hints
 
-- **Always reset on reuse.** A bolt from the pool still holds the old position
-  and speed. If you forget one field, a "new" bolt appears in the middle of the
-  screen or flies the wrong way.
+- Think of a **bowling alley's shoe rental**: shoes are not made per customer,
+  they are handed out, returned, cleaned, and handed out again.
+- **Always reset on reuse.** A bolt from the pool still has its old position.
+  Forget to reset it and the "new" bolt starts at the wall.
 - **Decide what happens when the pool is empty.** You can skip the shot (this
-  solution does, and counts it), grow the pool, or recycle the oldest bolt.
+  solution does), create an extra bolt, or reuse the oldest one.
 - **Never touch a bolt after releasing it.** Someone else may already own it.
-- A pool pays off only when objects are expensive to create or short-lived in
-  huge numbers (bullets, particles, DB connections, threads). For ordinary
-  objects, the JVM allocator is faster than any pool you write.
+- A pool is worth it only for objects that are **expensive to create** and
+  **needed again and again** (bullets, particles, DB connections, threads).
 
 ## Solution
 
