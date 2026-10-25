@@ -1,7 +1,7 @@
 package gof.creational.objectpool;
 
 /**
- * A crossbow bolt flying across the screen.
+ * A crossbow bolt.
  *
  * <p>Creating one is expensive: the constructor loads the bolt's sprite and
  * its fire-trail effect (~5 ms).
@@ -12,24 +12,18 @@ public class Bolt {
 
     private static int created;
 
-    private int x;
-    private final int speed;
+    private final String target;
 
-    public Bolt(int x, int speed) {
+    public Bolt(String target) {
         created++; // pretend: load sprite + fire-trail effect
-        this.x = x;
-        this.speed = speed;
+        this.target = target;
     }
 
     public static int created() {
         return created;
     }
 
-    public void move() {
-        x += speed;
-    }
-
-    public boolean hitWall(int wallX) {
-        return x >= wallX;
+    public String target() {
+        return target;
     }
 }

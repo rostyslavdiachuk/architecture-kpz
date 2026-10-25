@@ -1,40 +1,19 @@
 package gof.creational.objectpool;
 
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-
 /**
- * Object Pool smell: a brand-new {@link Bolt} for every shot.
+ * Object Pool smell: brand-new {@link Bolt}s for every volley.
  *
- * <p>Only a handful of bolts are ever in the air, but every shot pays the full
- * creation cost again, and every bolt that hits the wall is thrown away.
+ * <p>A volley needs only 5 bolts, and they are done as soon as they hit. But
+ * every volley pays the full creation cost again, and the old bolts are thrown away.
  */
 public class Turret {
 
-    private static final int WALL_X = 100;
-    private static final int BOLT_SPEED = 10;
+    public static final int BOLTS_PER_VOLLEY = 5;
 
-    private final List<Bolt> flying = new ArrayList<>();
-    private int maxInAir;
-
-    public void fire() {
-        flying.add(new Bolt(0, BOLT_SPEED));
-        maxInAir = Math.max(maxInAir, flying.size());
-    }
-
-    public void update() {
-        Iterator<Bolt> it = flying.iterator();
-        while (it.hasNext()) {
-            Bolt bolt = it.next();
-            bolt.move();
-            if (bolt.hitWall(WALL_X)) {
-                it.remove(); // thrown away
-            }
+    public void fireVolley(String target) {
+        for (int i = 0; i < BOLTS_PER_VOLLEY; i++) {
+            Bolt bolt = new Bolt(target);
+            // the bolt hits the target and is thrown away
         }
-    }
-
-    public int maxInAir() {
-        return maxInAir;
     }
 }

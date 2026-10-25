@@ -4,23 +4,24 @@ import common.Console;
 
 public class ObjectPoolDemo {
 
+    private static final String[] MONSTERS = {"Goblin", "Skeleton", "Orc", "Troll", "Dragon"};
+
     public static void main(String[] args) {
-        Console.header("GoF / Object Pool -- a new bolt for every shot");
+        Console.header("GoF / Object Pool -- new bolts for every volley");
 
         Turret turret = new Turret();
 
-        Console.step("Boss fight: the turret fires 1 bolt per frame for 600 frames (10 s at 60 FPS)");
-        for (int frame = 0; frame < 600; frame++) {
-            turret.fire();
-            turret.update();
+        for (int volley = 1; volley <= 10; volley++) {
+            String target = MONSTERS[(volley - 1) % MONSTERS.length];
+            turret.fireVolley(target);
+            Console.step("volley " + volley + " at the " + target + " -> bolts created so far: "
+                    + Bolt.created());
         }
 
-        Console.note("bolts in the air at once (max): " + turret.maxInAir());
-        Console.note("bolts created:                  " + Bolt.created());
-        Console.fail("only " + turret.maxInAir() + " bolts are ever needed, yet " + Bolt.created()
+        Console.fail("a volley needs only " + Turret.BOLTS_PER_VOLLEY + " bolts, yet " + Bolt.created()
                 + " were created -- " + Bolt.created() * Bolt.CREATION_COST_MS
                 + " ms spent loading the same sprite again and again");
-        Console.note("Refactor task: create the bolts once in a BoltPool; fire() takes a bolt from "
-                + "the pool, a bolt that hits the wall goes back to the pool.");
+        Console.note("Refactor task: create " + Turret.BOLTS_PER_VOLLEY + " bolts once in a BoltPool; "
+                + "a volley takes bolts from the pool and puts them back after they hit.");
     }
 }
