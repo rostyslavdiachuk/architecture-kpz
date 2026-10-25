@@ -5,16 +5,16 @@ import common.Console;
 public class AbstractFactoryDemo {
 
     public static void main(String[] args) {
-        Console.header("GoF / Abstract Factory -- one copy-pasted generator per theme");
+        Console.header("GoF / Abstract Factory -- one generator, one factory per theme");
 
         Console.step("Generating the Ice dungeon");
-        check("Ice", new IceDungeonGenerator().generate());
+        check("Ice", new DungeonGenerator(new IceThemeFactory()).generate());
 
         Console.step("Generating the Fire dungeon");
-        check("Fire", new FireDungeonGenerator().generate());
+        check("Fire", new DungeonGenerator(new FireThemeFactory()).generate());
 
-        Console.note("Refactor task: one DungeonThemeFactory per theme that creates the whole "
-                + "family (wall, monster, treasure); one DungeonGenerator that only uses the factory.");
+        Console.note("A new theme = one new DungeonThemeFactory. DungeonGenerator never changes, "
+                + "and it cannot mix parts from two themes.");
     }
 
     private static void check(String theme, Dungeon dungeon) {
@@ -22,8 +22,7 @@ public class AbstractFactoryDemo {
         if (dungeon.themes().size() == 1) {
             Console.ok("every part of the " + theme + " dungeon is " + theme);
         } else {
-            Console.fail("the " + theme + " dungeon mixes themes " + dungeon.themes()
-                    + " -- a " + dungeon.treasure().loot() + " is lying in the lava");
+            Console.fail("the " + theme + " dungeon mixes themes " + dungeon.themes());
         }
     }
 }

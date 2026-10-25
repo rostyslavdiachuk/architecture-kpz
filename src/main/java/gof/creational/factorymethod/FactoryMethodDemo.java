@@ -7,10 +7,10 @@ import java.util.List;
 public class FactoryMethodDemo {
 
     public static void main(String[] args) {
-        Console.header("GoF / Factory Method -- the level picks enemy classes with a switch");
+        Console.header("GoF / Factory Method -- each level subclass creates its own enemies");
 
-        for (String biome : List.of("Ice", "Fire", "Swamp")) {
-            DungeonLevel level = new DungeonLevel(biome);
+        for (DungeonLevel level : List.of(new IceCaveLevel(), new FireVolcanoLevel(), new SwampLevel())) {
+            String biome = level.biome();
             Console.step(biome + " level: wave of 3 + 1 reinforcement");
 
             List<String> wave = level.spawnWave(3).stream().map(Enemy::name).toList();
@@ -21,11 +21,11 @@ public class FactoryMethodDemo {
                 Console.ok("reinforcement: " + reinforcement.name());
             } else {
                 Console.fail("reinforcement: " + reinforcement.name() + " -- a " + reinforcement.biome()
-                        + " monster in the " + biome + " level; the second switch was never updated");
+                        + " monster in the " + biome + " level");
             }
         }
 
-        Console.note("Refactor task: make DungeonLevel abstract with a factory method "
-                + "createEnemy(); each biome is a subclass that decides which enemy to create.");
+        Console.note("A new biome = one new subclass with createEnemy(). DungeonLevel itself "
+                + "never changes, and there is no switch left to forget.");
     }
 }

@@ -8,11 +8,6 @@ public interface Enemy {
     String biome();
 }
 
-final class Goblin implements Enemy {
-    public String name() { return "Goblin"; }
-    public String biome() { return "Cave"; }
-}
-
 final class IceGolem implements Enemy {
     public String name() { return "Ice Golem"; }
     public String biome() { return "Ice"; }
