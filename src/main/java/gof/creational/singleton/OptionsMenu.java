@@ -5,7 +5,7 @@ import common.Console;
 /** The pause-screen menu where the player tweaks the game. */
 public class OptionsMenu {
 
-    private final GameSettings settings = new GameSettings();
+    private final GameSettings settings = GameSettings.getInstance();
 
     public void chooseDifficulty(Difficulty difficulty) {
         settings.setDifficulty(difficulty);

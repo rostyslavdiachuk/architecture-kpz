@@ -7,9 +7,10 @@ public class ObjectPoolDemo {
     private static final String[] MONSTERS = {"Goblin", "Skeleton", "Orc", "Troll", "Dragon"};
 
     public static void main(String[] args) {
-        Console.header("GoF / Object Pool -- new bolts for every volley");
+        Console.header("GoF / Object Pool -- bolts are reused through a BoltPool");
 
-        Turret turret = new Turret();
+        Console.step("Loading level: BoltPool creates " + Turret.BOLTS_PER_VOLLEY + " bolts");
+        Turret turret = new Turret(new BoltPool(Turret.BOLTS_PER_VOLLEY));
 
         for (int volley = 1; volley <= 10; volley++) {
             String target = MONSTERS[(volley - 1) % MONSTERS.length];
@@ -18,10 +19,10 @@ public class ObjectPoolDemo {
                     + Bolt.created());
         }
 
-        Console.fail("a volley needs only " + Turret.BOLTS_PER_VOLLEY + " bolts, yet " + Bolt.created()
-                + " were created -- " + Bolt.created() * Bolt.CREATION_COST_MS
-                + " ms spent loading the same sprite again and again");
-        Console.note("Refactor task: create " + Turret.BOLTS_PER_VOLLEY + " bolts once in a BoltPool; "
-                + "a volley takes bolts from the pool and puts them back after they hit.");
+        Console.ok("10 volleys fired with only " + Bolt.created() + " bolts -- "
+                + Bolt.created() * Bolt.CREATION_COST_MS + " ms of loading, all of it before the "
+                + "fight started");
+        Console.note("Every reused bolt goes through reset(target): forget it and the volley at "
+                + "the Troll hits the Goblin.");
     }
 }

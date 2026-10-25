@@ -3,25 +3,33 @@ package gof.creational.singleton;
 import common.Console;
 
 /**
- * Singleton smell: a "one per game" object that anybody can {@code new}.
+ * Singleton: the player's options exist exactly once per game.
  *
- * <p>There is exactly one settings file and the player expects exactly one set
- * of options, but the public constructor lets every subsystem create its own
- * copy. Each copy parses {@code settings.cfg} again and then lives its own life:
- * a change made through one copy is invisible to all the others.
+ * <p>The private constructor makes a second instance impossible. The nested
+ * {@code Holder} class is initialized by the JVM only on the first call to
+ * {@link #getInstance()}, so creation is both lazy and thread-safe without any
+ * locking.
  */
-public class GameSettings {
+public final class GameSettings {
 
     private static int loadCount;
 
     private Difficulty difficulty;
     private int musicVolume;
 
-    public GameSettings() {
+    private GameSettings() {
         loadCount++;
         Console.note("parsing settings.cfg (load #" + loadCount + ")");
         this.difficulty = Difficulty.NORMAL;
         this.musicVolume = 80;
+    }
+
+    private static final class Holder {
+        private static final GameSettings INSTANCE = new GameSettings();
+    }
+
+    public static GameSettings getInstance() {
+        return Holder.INSTANCE;
     }
 
     public static int loadCount() {

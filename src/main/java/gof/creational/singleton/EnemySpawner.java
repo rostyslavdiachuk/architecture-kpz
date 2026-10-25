@@ -5,7 +5,7 @@ public class EnemySpawner {
 
     private static final int BASE_GOBLIN_HP = 40;
 
-    private final GameSettings settings = new GameSettings();
+    private final GameSettings settings = GameSettings.getInstance();
 
     /** @return HP of the goblin that was spawned */
     public int spawnGoblin() {

@@ -1,19 +1,35 @@
 package gof.creational.objectpool;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
- * Object Pool smell: brand-new {@link Bolt}s for every volley.
- *
- * <p>A volley needs only 5 bolts, and they are done as soon as they hit. But
- * every volley pays the full creation cost again, and the old bolts are thrown away.
+ * Fires volleys with bolts taken from a {@link BoltPool} and puts them back
+ * after they hit. No bolt is created during the fight.
  */
 public class Turret {
 
     public static final int BOLTS_PER_VOLLEY = 5;
 
+    private final BoltPool pool;
+
+    public Turret(BoltPool pool) {
+        this.pool = pool;
+    }
+
     public void fireVolley(String target) {
+        List<Bolt> volley = new ArrayList<>();
         for (int i = 0; i < BOLTS_PER_VOLLEY; i++) {
-            Bolt bolt = new Bolt(target);
-            // the bolt hits the target and is thrown away
+            Bolt bolt = pool.acquire();
+            if (bolt == null) {
+                break; // pool is empty: fire fewer bolts
+            }
+            bolt.reset(target);
+            volley.add(bolt);
+        }
+        // the bolts hit the target...
+        for (Bolt bolt : volley) {
+            pool.release(bolt); // ...and go back to the pool for the next volley
         }
     }
 }

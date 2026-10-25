@@ -3,7 +3,13 @@ package gof.creational.prototype;
 import java.util.ArrayList;
 import java.util.List;
 
-/** A monster in the dungeon. */
+/**
+ * A monster in the dungeon that can copy itself (the Prototype).
+ *
+ * <p>{@link #copy()} deep-copies what each enemy changes on its own, its
+ * {@link Stats} and its abilities, and shares the immutable {@link Mesh}. So
+ * the expensive mesh is loaded once, and hitting one clone never hurts another.
+ */
 public class Enemy {
 
     private String name;
@@ -16,6 +22,17 @@ public class Enemy {
         this.mesh = mesh;
         this.stats = stats;
         this.abilities = new ArrayList<>(abilities);
+    }
+
+    private Enemy(Enemy prototype) {
+        this.name = prototype.name;
+        this.mesh = prototype.mesh;                    // immutable -> shared
+        this.stats = new Stats(prototype.stats);       // mutable   -> deep copy
+        this.abilities = new ArrayList<>(prototype.abilities);
+    }
+
+    public Enemy copy() {
+        return new Enemy(this);
     }
 
     public String name() {

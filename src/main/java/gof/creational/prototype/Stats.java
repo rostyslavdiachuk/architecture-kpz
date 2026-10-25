@@ -13,6 +13,11 @@ public class Stats {
         this.iceResistance = iceResistance;
     }
 
+    /** Copy constructor: every clone needs its own HP bar. */
+    public Stats(Stats other) {
+        this(other.hp, other.attack, other.iceResistance);
+    }
+
     public int hp() {
         return hp;
     }
