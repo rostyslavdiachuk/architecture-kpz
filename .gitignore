@@ -1,0 +1,16 @@
+## .NET build output
+bin/
+obj/
+*.user
+*.suo
+.vs/
+
+## IDEs
+.idea/
+.vscode/
+
+## Leftovers from the Java branches
+target/
+
+## Mac OS
+.DS_Store
