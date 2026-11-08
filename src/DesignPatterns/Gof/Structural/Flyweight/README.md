@@ -51,6 +51,28 @@ After the refactor there are still 40,000 `Tile`s, but **3** textures (192 KB).
 - You know this pattern already: string literals are interned, so two equal
   literals are the same object.
 
+## C# specifics
+
+- **The extrinsic part can be a value type.** `Tile` is a `readonly record struct`,
+  so `Tile[]` holds 40,000 tiles inline: two ints and one reference each, no
+  object header, nothing extra for the GC to track. The demo measures it with
+  `GC.GetAllocatedBytesForCurrentThread()`: about **625 KB** for structs against
+  about **1562 KB** if `Tile` were a class. Java has no user-defined value types
+  yet, so there every `Tile` is a separate object.
+- **Records make the flyweight immutable.** The positional properties of
+  `record TileType(...)` are init-only, so nobody can repaint all floor tiles by
+  accident.
+- **Thread-safe factory.** If the map is generated in parallel, use
+  `ConcurrentDictionary<string, TileType>` and `GetOrAdd(kind, Create)` instead of
+  `Dictionary` + `TryGetValue`.
+- **Flyweights already in .NET:**
+  - the string intern pool: equal literals are one object, and
+    `string.Intern(s)` returns the shared instance (shown in the demo)
+  - `StringComparer.Ordinal`, `Encoding.UTF8`, `EqualityComparer<T>.Default`:
+    one shared, stateless instance handed to everyone
+  - `Task.CompletedTask`, `Array.Empty<T>()`: shared immutable instances
+  - `ArrayPool<T>` is **not** a flyweight but an object pool: one user at a time.
+
 ## Solution
 
 ```bash

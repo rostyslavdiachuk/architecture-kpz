@@ -62,6 +62,36 @@ Delete `Inventory`: the hero's inventory is simply a `Bag`.
 - Use it when your data is really a **part-whole tree**. Files and folders, UI
   panels and buttons, and org charts have the same shape.
 
+## C# specifics
+
+- **Collection initializers build the tree.** `Bag` implements
+  `IEnumerable<IInventoryEntry>` and has an `Add` method, so the inventory is
+  written in the same shape as the tree:
+
+  ```csharp
+  var inventory = new Bag("Inventory", 0)
+  {
+      new Item("Sword", 8, 100),
+      new Bag("Backpack", 2)
+      {
+          new Item("Potion", 1, 50),
+          new Bag("Pouch", 1) { new Item("Ruby", 1, 500), /* ... */ },
+      },
+  };
+  ```
+
+- **A default interface member for the children.** `IInventoryEntry.Children => []`
+  gives every leaf an empty list for free; only `Bag` overrides it. No type check
+  is needed even to walk the tree.
+- **`yield return` makes the tree a sequence.** `Bag.Flatten()` walks every level
+  lazily, so LINQ works over the whole tree:
+  `inventory.Flatten().OfType<Item>().MaxBy(i => i.Value)`.
+- **Records as leaves.** `record Item(string Name, int Weight, int Value) : IInventoryEntry`:
+  the positional properties implement the interface, no body needed.
+- **Composites already in .NET:** WinForms `Control.Controls`, the WPF/MAUI visual
+  tree, Roslyn `SyntaxNode.ChildNodes()`, `System.Linq.Expressions.Expression`,
+  `System.Text.Json.Nodes.JsonNode` (`JsonObject` / `JsonArray` / `JsonValue`).
+
 ## Solution
 
 ```bash

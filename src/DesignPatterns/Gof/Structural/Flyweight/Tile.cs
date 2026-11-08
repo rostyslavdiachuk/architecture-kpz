@@ -1,31 +1,12 @@
 namespace DesignPatterns.Gof.Structural.Flyweight;
 
-/// <summary>
-/// Flyweight smell: each tile keeps its own copy of data that is the same for
-/// every tile of its kind.
-/// </summary>
+/// <summary>The extrinsic state: only the position is unique to a tile, the rest is shared.</summary>
 /// <remarks>
-/// Only <see cref="X"/> and <see cref="Y"/> are unique to a tile. The kind, the texture and
-/// the walkable flag are identical for all floor tiles, yet each tile holds them.
+/// C# specific: a <c>readonly record struct</c> is a value type. A <c>Tile[]</c> stores the
+/// 40,000 tiles inline (two ints and one reference each), with no object per tile, so even the
+/// unique part costs as little as it can.
 /// </remarks>
-public class Tile
+public readonly record struct Tile(int X, int Y, TileType Type)
 {
-    public Tile(int x, int y, string kind, TextureLoader loader)
-    {
-        X = x;
-        Y = y;
-        Kind = kind;
-        Texture = loader.Load(kind + ".png");
-        Walkable = kind != "wall";
-    }
-
-    public int X { get; }
-
-    public int Y { get; }
-
-    public string Kind { get; }
-
-    public Texture Texture { get; }
-
-    public bool Walkable { get; }
+    public bool Walkable => Type.Walkable;
 }

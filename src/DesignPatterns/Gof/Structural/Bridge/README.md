@@ -57,6 +57,23 @@ Spell spell = new Nova(new Ice());
 - You know this pattern already: ADO.NET. Your code uses `DbConnection`, and the
   provider (SQL Server, PostgreSQL, SQLite) is the separate implementation hierarchy.
 
+## C# specifics
+
+- **Primary constructors (C# 12)** shrink each side of the bridge:
+  `public sealed class Nova(IElement element) : Spell(element)` is the whole
+  constructor, and `Spell` reads the captured `element` directly.
+- **A compile-time bridge with generics.** `Wave<TElement> where TElement : IElement, new()`
+  takes the element as a type argument: `new Wave<Poison>()`. .NET generics are
+  not erased (unlike Java), so `TElement` can be created with `new()` and is
+  still known at run time. The cost: the element is fixed at compile time, so the
+  constructor version is still needed when combinations come from data.
+- **Bridges already in .NET:**
+  - ADO.NET: `DbConnection` / `DbCommand` on one side, providers
+    (`SqlConnection`, `NpgsqlConnection`, `SqliteConnection`) on the other
+  - `Stream` (file, memory, network, gzip) on one side, `StreamReader` /
+    `BinaryReader` / `XmlReader` on the other: any reader works over any stream
+  - `ILogger` used by your code, `ILoggerProvider` (console, file, Seq) doing the work
+
 ## Solution
 
 ```bash

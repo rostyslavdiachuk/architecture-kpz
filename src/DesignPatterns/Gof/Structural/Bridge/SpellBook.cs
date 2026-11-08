@@ -1,15 +1,20 @@
 namespace DesignPatterns.Gof.Structural.Bridge;
 
-/// <summary>All the spells the game knows. Every spell has to be a class of its own.</summary>
+/// <summary>All the spells the game knows: every form combined with every element.</summary>
 public class SpellBook
 {
-    private readonly List<ISpell> _spells =
-    [
-        new FireBolt(), new FireNova(),
-        new IceBolt(), new IceNova(),
-        new PoisonBolt(),
-    ];
+    private readonly List<Spell> _spells = [];
 
-    public ISpell? Find(string element, string form) =>
+    public SpellBook()
+    {
+        IElement[] elements = [new Fire(), new Ice(), new Poison()];
+        foreach (var element in elements)
+        {
+            _spells.Add(new Bolt(element));
+            _spells.Add(new Nova(element));
+        }
+    }
+
+    public Spell? Find(string element, string form) =>
         _spells.FirstOrDefault(spell => spell.Element == element && spell.Form == form);
 }

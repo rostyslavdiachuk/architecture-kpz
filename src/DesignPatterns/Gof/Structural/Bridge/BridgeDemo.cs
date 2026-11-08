@@ -13,7 +13,7 @@ public static class BridgeDemo
 
     public static void Run()
     {
-        Out.Header("GoF / Bridge -- one class per element and form combination");
+        Out.Header("GoF / Bridge -- spell forms and elements are two hierarchies");
 
         var book = new SpellBook();
 
@@ -24,7 +24,7 @@ public static class BridgeDemo
                 var spell = book.Find(element, form);
                 if (spell is null)
                 {
-                    Out.Fail($"{element} {form}: there is no such class -- the spell cannot be cast");
+                    Out.Fail($"{element} {form}: the spell cannot be cast");
                 }
                 else if (spell.Effect != Effects[element])
                 {
@@ -37,7 +37,12 @@ public static class BridgeDemo
             }
         }
 
-        Out.Note("Refactor task: split into two hierarchies: Spell (Bolt, Nova) holds an "
-                 + "IElement (Fire, Ice, Poison). 2 forms + 3 elements = 5 classes, 6 spells.");
+        Out.Note("2 forms + 3 elements = 5 classes, 6 spells. A new form or element is one class, "
+                 + "and it combines with everything on the other side.");
+
+        Out.Step("C# extra: a compile-time bridge -- the element as a generic type argument");
+        Spell wave = new Wave<Poison>();
+        Out.Ok($"{wave.Cast()}  (runtime type: Wave<{wave.GetType().GetGenericArguments()[0].Name}>)");
+        Out.Note("Wave<Poison> is fixed when compiled; use the constructor form when the element comes from data.");
     }
 }
